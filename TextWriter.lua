@@ -5,7 +5,7 @@ require("Colors");
 ---@type table<string, number>
 local Constants = {
     GapSize = 15.4,         -- CSS Flex gapsize == 1em == 15.4px
-    LeftPadding = 3,        -- In CSS: The left element, not the padding-left element!
+    LeftPadding = 3,        -- In CSS: The left property, not the padding-left property!
     ExtraSpacePerText = 1,  -- Idk, the space might be too short without it
     DefaultCharWidth=10,    -- If a given char is not present in CharWidths
 };
@@ -314,6 +314,7 @@ local function ParseElements(Elements, MaxWidth, ExpectedDepth)
     ---@type string
     local currentColor = "";
 
+    print()
     ---@type {Width: number, Elements: TextPiece[]}
     local beforeWordbreak = { Width = -Constants.GapSize + ExpectedDepth*Constants.LeftPadding, Elements = {} };
 
@@ -340,6 +341,7 @@ local function ParseElements(Elements, MaxWidth, ExpectedDepth)
             currentColor = element.Content;
             i = i + 1;
         elseif element.Type == ElementType.WordBreak then
+            print("A", beforeWordbreak.Width, beforeWordbreak.Width + afterWordbreak.Width + Constants.GapSize - Constants.LeftPadding);
             beforeWordbreak.Width = beforeWordbreak.Width + afterWordbreak.Width + Constants.GapSize - Constants.LeftPadding;
             Extend(beforeWordbreak.Elements, afterWordbreak.Elements);
             afterWordbreak = { Width = -Constants.GapSize + ExpectedDepth*Constants.LeftPadding, Elements = {} };
@@ -349,6 +351,7 @@ local function ParseElements(Elements, MaxWidth, ExpectedDepth)
 
             ---@cast element TextPiece
             element.Color = currentColor;
+            print("B", beforeWordbreak.Width + afterWordbreak.Width + Constants.GapSize - Constants.LeftPadding)
             ---@type number
             local currentWidth = beforeWordbreak.Width + afterWordbreak.Width + Constants.GapSize - Constants.LeftPadding;
 
@@ -377,7 +380,8 @@ local function ParseElements(Elements, MaxWidth, ExpectedDepth)
                         ---@type Element
                         local after = result[3]
                         ---@cast after TextPiece
-
+                        
+                        print("C", afterWordbreak.Width, afterWordbreak.Width + math.ceil(GetTextWidth(before.Text)) + Constants.ExtraSpacePerText + Constants.GapSize + Constants.LeftPadding)
                         afterWordbreak.Width = afterWordbreak.Width + math.ceil(GetTextWidth(before.Text)) + Constants.ExtraSpacePerText + Constants.GapSize + Constants.LeftPadding;
                         table.insert(afterWordbreak.Elements, before);
 
@@ -393,6 +397,7 @@ local function ParseElements(Elements, MaxWidth, ExpectedDepth)
                     currentWidth = currentWidth + width;
                 end
             end
+            print("D", afterWordbreak.Width, beforeWordbreak.Width + afterWordbreak.Width + math.ceil(GetTextWidth(element.Text)) + Constants.ExtraSpacePerText + Constants.GapSize + Constants.LeftPadding)
             afterWordbreak.Width = beforeWordbreak.Width + afterWordbreak.Width + math.ceil(GetTextWidth(element.Text)) + Constants.ExtraSpacePerText + Constants.GapSize + Constants.LeftPadding;
             table.insert(afterWordbreak.Elements, element);
         end
