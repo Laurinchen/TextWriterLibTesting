@@ -177,17 +177,18 @@ local function GetElements(Text)
                 parsingmode = ParsingMode.NotParsing;
                 TextBuffer = TextBuffer .. "<";
             else
+                if TextBuffer ~= "" then
+                    table.insert(Elements, CreateTextPiece(TextBuffer, CreatePosition(from, to - 2)));
+                end
                 if c ~= ">" then
                     parsingmode = ParsingMode.ParsingOtherCharsOfColor;
-                    if TextBuffer ~= "" then
-                        table.insert(Elements, CreateTextPiece(TextBuffer, CreatePosition(from, to - 2)));
-                    end
                     TextBuffer = c;
                     from = to - 1;
                 else
                     parsingmode = ParsingMode.NotParsing;
-                    table.insert(Elements, CreateTag("", CreatePosition(to-1, to)))
+                    table.insert(Elements, CreateTag("", CreatePosition(to - 1, to)));
                     TextBuffer = "";
+                    from = to+1;
                 end
             end
         elseif parsingmode == ParsingMode.ParsingOtherCharsOfColor then
