@@ -7,7 +7,8 @@ local Constants = {
     GapSize = 15.4,         -- CSS Flex gapsize == 1em == 15.4px
     LeftPadding = 3,        -- In CSS: The left property, not the padding-left property!
     ExtraSpacePerText = 1,  -- Idk, the space might be too short without it
-    DefaultCharWidth=10,    -- If a given char is not present in CharWidths
+    DefaultCharWidth = 10,  -- If a given char is not present in CharWidths
+    MinWidth = 20           -- Without it, the code my loop infinitely with a too small MaxWidth
 };
 
 
@@ -233,7 +234,7 @@ local function AddNewlines(TextPiece, CharIndex)
 
     CharIndex = CharIndex - 1;
 
-    
+
     ---@type integer
     local from = TextPiece.PositionInOriginal.From;
     ---@type integer
@@ -254,7 +255,8 @@ local function AddNewlines(TextPiece, CharIndex)
         return {
             CreateTextPiece(before, CreatePosition(from, from + CharIndex - 1), TextPiece.Color),
             CreateNewline(CreatePosition(from + CharIndex, from + CharIndex)),
-            CreateTextPiece(after, CreatePosition(from + CharIndex + 1, math.max(from + CharIndex + 1, to)), TextPiece.Color)
+            CreateTextPiece(after, CreatePosition(from + CharIndex + 1, math.max(from + CharIndex + 1, to)),
+                TextPiece.Color)
         };
     end
     for ci = CharIndex, 1, -1 do
@@ -269,7 +271,7 @@ local function AddNewlines(TextPiece, CharIndex)
             ---@type Position
             local beforePosition;
             if ci == 1 then
-                beforePosition = CreatePosition(from-1, from-1);
+                beforePosition = CreatePosition(from - 1, from - 1);
             else
                 beforePosition = CreatePosition(from, from + ci - 2);
             end
@@ -314,12 +316,11 @@ local function ParseElements(Elements, MaxWidth, ExpectedDepth)
     ---@type string
     local currentColor = "";
 
-    print()
     ---@type {Width: number, Elements: TextPiece[]}
-    local beforeWordbreak = { Width = -Constants.GapSize + ExpectedDepth*Constants.LeftPadding, Elements = {} };
+    local beforeWordbreak = { Width = -Constants.GapSize + ExpectedDepth * Constants.LeftPadding, Elements = {} };
 
     ---@type {Width: number, Elements: TextPiece[]}
-    local afterWordbreak = { Width = -Constants.GapSize + ExpectedDepth*Constants.LeftPadding, Elements = {} };
+    local afterWordbreak = { Width = -Constants.GapSize + ExpectedDepth * Constants.LeftPadding, Elements = {} };
 
 
     while i <= #Elements do
@@ -333,27 +334,27 @@ local function ParseElements(Elements, MaxWidth, ExpectedDepth)
             Extend(buffer.Elements, afterWordbreak.Elements);
             table.insert(toReturn, buffer);
 
-            beforeWordbreak = { Width = -Constants.GapSize + ExpectedDepth*Constants.LeftPadding, Elements = {} };
-            afterWordbreak = { Width = -Constants.GapSize + ExpectedDepth*Constants.LeftPadding, Elements = {} };
+            beforeWordbreak = { Width = -Constants.GapSize + ExpectedDepth * Constants.LeftPadding, Elements = {} };
+            afterWordbreak = { Width = -Constants.GapSize + ExpectedDepth * Constants.LeftPadding, Elements = {} };
             i = i + 1;
         elseif element.Type == ElementType.Tag then
             ---@cast element Tag
             currentColor = element.Content;
             i = i + 1;
         elseif element.Type == ElementType.WordBreak then
-            print("A", beforeWordbreak.Width, beforeWordbreak.Width + afterWordbreak.Width + Constants.GapSize - Constants.LeftPadding);
-            beforeWordbreak.Width = beforeWordbreak.Width + afterWordbreak.Width + Constants.GapSize - Constants.LeftPadding;
+            beforeWordbreak.Width = beforeWordbreak.Width + afterWordbreak.Width + Constants.GapSize -
+                Constants.LeftPadding;
             Extend(beforeWordbreak.Elements, afterWordbreak.Elements);
-            afterWordbreak = { Width = -Constants.GapSize + ExpectedDepth*Constants.LeftPadding, Elements = {} };
+            afterWordbreak = { Width = -Constants.GapSize + ExpectedDepth * Constants.LeftPadding, Elements = {} };
             i = i + 1;
         elseif element.Type == ElementType.TextPiece then
             i = i + 1;
 
             ---@cast element TextPiece
             element.Color = currentColor;
-            print("B", beforeWordbreak.Width + afterWordbreak.Width + Constants.GapSize - Constants.LeftPadding)
             ---@type number
-            local currentWidth = beforeWordbreak.Width + afterWordbreak.Width + Constants.GapSize - Constants.LeftPadding;
+            local currentWidth = beforeWordbreak.Width + afterWordbreak.Width + Constants.GapSize - Constants
+                .LeftPadding;
 
             ---@type integer
             local ci = 1
@@ -367,43 +368,49 @@ local function ParseElements(Elements, MaxWidth, ExpectedDepth)
                     local _, count = string.gsub(element.Text, "%s", "", 1);
                     if count == 0 and #beforeWordbreak.Elements > 0 then
                         table.insert(toReturn, beforeWordbreak);
-                        beforeWordbreak = { Width = -Constants.GapSize + ExpectedDepth*Constants.LeftPadding, Elements = {} };
+                        beforeWordbreak = { Width = -Constants.GapSize + ExpectedDepth * Constants.LeftPadding, Elements = {} };
                         currentWidth = afterWordbreak.Width;
                         ci = 1;
                     else
                         ---@type Element[]
                         local result = AddNewlines(element, ci);
-                        
+
                         ---@type Element
                         local before = result[1];
                         ---@cast before TextPiece
                         ---@type Element
                         local after = result[3]
                         ---@cast after TextPiece
-                        
-                        print("C", afterWordbreak.Width, afterWordbreak.Width + math.ceil(GetTextWidth(before.Text)) + Constants.ExtraSpacePerText + Constants.GapSize + Constants.LeftPadding)
-                        afterWordbreak.Width = afterWordbreak.Width + math.ceil(GetTextWidth(before.Text)) + Constants.ExtraSpacePerText + Constants.GapSize + Constants.LeftPadding;
-                        table.insert(afterWordbreak.Elements, before);
 
-                        table.insert(toReturn, afterWordbreak);
-                        afterWordbreak = { Width = -Constants.GapSize + ExpectedDepth*Constants.LeftPadding, Elements = {} };
+                        ---@type Line;
+                        local buffer = { Width = 0, Elements = {} };
+                        if #beforeWordbreak.Elements > 0 then
+                            buffer.Width = beforeWordbreak.Width;
+                            Extend(buffer.Elements, beforeWordbreak.Elements);
+                        end
+                        buffer.Width = buffer.Width + afterWordbreak.Width;
+                        Extend(buffer.Elements, afterWordbreak.Elements);
+                        table.insert(toReturn, buffer);
+
+                        beforeWordbreak = { Width = -Constants.GapSize + ExpectedDepth * Constants.LeftPadding, Elements = {} };
+                        afterWordbreak = { Width = -Constants.GapSize + ExpectedDepth * Constants.LeftPadding, Elements = {} };
 
                         element = after;
                         ci = 1;
-                        currentWidth = -Constants.GapSize + ExpectedDepth*Constants.LeftPadding;
+                        currentWidth = -Constants.GapSize + ExpectedDepth * Constants.LeftPadding;
                     end
                 else
                     ci = ci + 1;
                     currentWidth = currentWidth + width;
                 end
             end
-            print("D", afterWordbreak.Width, beforeWordbreak.Width + afterWordbreak.Width + math.ceil(GetTextWidth(element.Text)) + Constants.ExtraSpacePerText + Constants.GapSize + Constants.LeftPadding)
-            afterWordbreak.Width = beforeWordbreak.Width + afterWordbreak.Width + math.ceil(GetTextWidth(element.Text)) + Constants.ExtraSpacePerText + Constants.GapSize + Constants.LeftPadding;
+            afterWordbreak.Width = beforeWordbreak.Width + afterWordbreak.Width + math.ceil(GetTextWidth(element.Text)) +
+                Constants.ExtraSpacePerText + Constants.GapSize + Constants.LeftPadding;
             table.insert(afterWordbreak.Elements, element);
         end
     end
 
-    ---@type {Width: number, Elements: TextPiece[]};
+    ---@type Line;
     local buffer = { Width = beforeWordbreak.Width, Elements = {} }
     Extend(buffer.Elements, beforeWordbreak.Elements);
     buffer.Width = buffer.Width + afterWordbreak.Width;
@@ -416,29 +423,28 @@ end
 ---Internal functions
 ---@type table<string, function | table<string, number>>
 KaninchenLibTextWriter = {
-    TestPositionField=TestPositionField,
-    CreatePosition=CreatePosition,
-    TestPosition=TestPosition,
-    CreateTag=CreateTag,
-    CreateNewline=CreateNewline,
-    CreateWordBreak=CreateWordBreak,
-    CreateTextPiece=CreateTextPiece,
-    GetElements=GetElements,
-    Extend=Extend,
-    ParseElements=ParseElements,
-    GetTextWidth=GetTextWidth,
-    AddNewlines=AddNewlines,
-    Constants=Constants,
-    ParsingMode=ParsingMode,
-    ElementType=ElementType
+    TestPositionField = TestPositionField,
+    CreatePosition = CreatePosition,
+    TestPosition = TestPosition,
+    CreateTag = CreateTag,
+    CreateNewline = CreateNewline,
+    CreateWordBreak = CreateWordBreak,
+    CreateTextPiece = CreateTextPiece,
+    GetElements = GetElements,
+    Extend = Extend,
+    ParseElements = ParseElements,
+    GetTextWidth = GetTextWidth,
+    AddNewlines = AddNewlines,
+    Constants = Constants,
+    ParsingMode = ParsingMode,
+    ElementType = ElementType
 };
 
 ---@param UIGroup HorizontalLayoutGroup | VerticalLayoutGroup | EmptyUIObject
 ---@param Text string
----@param MaxWidth? integer
+---@param MaxWidth? number
 ---@param ExpectedDepth? integer
 function AddStringToUI(UIGroup, Text, MaxWidth, ExpectedDepth)
-
     ExpectedDepth = ExpectedDepth or 2;
     -- if math.type(ExpectedDepth) == "float" then
     --     ExpectedDepth = math.ceil(ExpectedDepth);
@@ -448,30 +454,24 @@ function AddStringToUI(UIGroup, Text, MaxWidth, ExpectedDepth)
         if UIGroup.GetPreferredWidth ~= nil then
             MaxWidth = UIGroup.GetPreferredWidth();
         else
-            MaxWidth = 20;
+            MaxWidth = -1;
         end
     end
 
-
-    ---@type integer
-    MaxWidth = math.max(20, MaxWidth);
-    if UIGroup.SetPreferredWidth ~= nil then
-        UIGroup.SetPreferredWidth(MaxWidth);
-        UIGroup.SetFlexibleWidth(0);
-    end
+    MaxWidth = math.max(Constants.MinWidth, MaxWidth);
 
     for _, line in ipairs(ParseElements(GetElements(Text), MaxWidth, ExpectedDepth)) do
         ---@type HorizontalLayoutGroup
         local hlg = UI.CreateHorizontalLayoutGroup(UIGroup);
 
-        print("---", line.Width, #line.Elements);
-
         for _, textpiece in ipairs(line.Elements) do
+            if textpiece.Text == "" then
+                goto continue;
+            end
+
             ---@type Label
             local label = UI.CreateLabel(hlg);
 
-            print(_, "Adding", textpiece.Text)
-            
             if string.sub(textpiece.Color, 1, 1) ~= "#" then
                 textpiece.Color = Colors[textpiece.Color]
             end
@@ -480,15 +480,7 @@ function AddStringToUI(UIGroup, Text, MaxWidth, ExpectedDepth)
                 label.SetColor(textpiece.Color);
             end
             label.SetText(textpiece.Text);
+            ::continue::
         end
     end
 end
-
----@type Line[]
-local lines = ParseElements(GetElements([[Lorem </>ipsum dolor sit <#ffff00>amet, consetetur sadipscing </>elitr, sed diam nonumy eirmod tempor invidunt<wbr>ut labore et dolore magna <blue>aliquyam erat, sed<wbr>diam <#ffff00>voluptua. At vero eos et accusam et justo duo dolores <#ffff00>et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum <green>dolor sit amet. <blue>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed <blue>diam nonumy eirmod tempor </>invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et <yellow>justo duo dolores et ea <yellow>rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor </>sit amet. Lorem ipsum dolor sit amet, consetetur <#ffff00>sadipscing </>elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos <#ffff00>et accusam<wbr>et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea </>takimata sanctus est Lorem ipsum <#ffff00>dolor sit amet.<wbr>  
-
-Duis autem vel<wbr>eum iriure dolor in hendrerit <#ffff00>in <#ffff00>vulputate velit <green>esse molestie consequat, vel illum dolore <blue>eu feugiat </>nulla facilisis at vero eros]]), 200, 2)
----@type integer
-local linenumber = #lines
-print(linenumber)
-print(#lines[linenumber].Elements, lines[linenumber].Width, lines[linenumber].Elements[1].Text, lines[linenumber].Elements[2].Text)
