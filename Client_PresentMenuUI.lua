@@ -25,7 +25,8 @@ function Client_PresentMenuUI(rootParent, setMaxSize, setScrollable, game, close
 
     ---@type TextInputField
     local UITextInput = UI.CreateTextInputField(UIInput)
-    UITextInput.SetPreferredHeight(300);
+    UITextInput.SetPreferredHeight(200);
+    UITextInput.SetFlexibleWidth(700);
 
 
     ---@type Button
