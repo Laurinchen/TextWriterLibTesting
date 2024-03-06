@@ -459,9 +459,13 @@ function AddStringToUI(UIGroup, Text, MaxWidth, ExpectedDepth)
         ---@type HorizontalLayoutGroup
         local hlg = UI.CreateHorizontalLayoutGroup(UIGroup);
 
+        print("---", line.Width, #line.Elements);
+
         for _, textpiece in ipairs(line.Elements) do
             ---@type Label
             local label = UI.CreateLabel(hlg);
+
+            print(_, "Adding", textpiece.Text)
             
             if string.sub(textpiece.Color, 1, 1) ~= "#" then
                 textpiece.Color = Colors[textpiece.Color]
@@ -475,6 +479,11 @@ function AddStringToUI(UIGroup, Text, MaxWidth, ExpectedDepth)
     end
 end
 
-ParseElements(GetElements([[Lorem </>ipsum dolor sit <#ffff00>amet, consetetur sadipscing </>elitr, sed diam nonumy eirmod tempor invidunt<wbr>ut labore et dolore magna <blue>aliquyam erat, sed<wbr>diam <#ffff00>voluptua. At vero eos et accusam et justo duo dolores <#ffff00>et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum <green>dolor sit amet. <blue>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed <blue>diam nonumy eirmod tempor </>invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et <yellow>justo duo dolores et ea <yellow>rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor </>sit amet. Lorem ipsum dolor sit amet, consetetur <#ffff00>sadipscing </>elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos <#ffff00>et accusam<wbr>et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea </>takimata sanctus est Lorem ipsum <#ffff00>dolor sit amet.<wbr>  
+---@type Line[]
+local lines = ParseElements(GetElements([[Lorem </>ipsum dolor sit <#ffff00>amet, consetetur sadipscing </>elitr, sed diam nonumy eirmod tempor invidunt<wbr>ut labore et dolore magna <blue>aliquyam erat, sed<wbr>diam <#ffff00>voluptua. At vero eos et accusam et justo duo dolores <#ffff00>et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum <green>dolor sit amet. <blue>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed <blue>diam nonumy eirmod tempor </>invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et <yellow>justo duo dolores et ea <yellow>rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor </>sit amet. Lorem ipsum dolor sit amet, consetetur <#ffff00>sadipscing </>elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos <#ffff00>et accusam<wbr>et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea </>takimata sanctus est Lorem ipsum <#ffff00>dolor sit amet.<wbr>  
 
-Duis autem vel<wbr>eum iriure dolor in hendrerit <#ffff00>in <#ffff00>vulputate velit <green>esse molestie consequat, vel illum dolore <blue>eu feugiat </>nulla facilisis at vero eros]]), 100, 2)
+Duis autem vel<wbr>eum iriure dolor in hendrerit <#ffff00>in <#ffff00>vulputate velit <green>esse molestie consequat, vel illum dolore <blue>eu feugiat </>nulla facilisis at vero eros]]), 200, 2)
+---@type integer
+local linenumber = #lines
+print(linenumber)
+print(#lines[linenumber].Elements, lines[linenumber].Width, lines[linenumber].Elements[1].Text, lines[linenumber].Elements[2].Text)
