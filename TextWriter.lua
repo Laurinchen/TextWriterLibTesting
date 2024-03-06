@@ -467,8 +467,8 @@ function AddStringToUI(UIGroup, Text, MaxWidth, ExpectedDepth)
                 textpiece.Color = Colors[textpiece.Color]
             end
 
-            label.SetPreferredWidth(math.ceil(GetTextWidth(textpiece.Text)) + Constants.ExtraSpacePerText);
-            label.SetFlexibleWidth(0);
+            -- label.SetPreferredWidth(math.ceil(GetTextWidth(textpiece.Text)) + Constants.ExtraSpacePerText);
+            -- label.SetFlexibleWidth(0);
             if textpiece.Color ~= nil and not (textpiece.Color == "") then
                 label.SetColor(textpiece.Color);
             end
