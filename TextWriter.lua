@@ -4,11 +4,11 @@ require("Colors");
 
 ---@type table<string, number>
 local Constants = {
-    GapSize = 15.4,         -- CSS Flex gapsize == 1em == 15.4px
-    LeftPadding = 3,        -- In CSS: The left property, not the padding-left property!
-    ExtraSpacePerText = 1,  -- Idk, the space might be too short without it
-    DefaultCharWidth = 10,  -- If a given char is not present in CharWidths
-    MinWidth = 20           -- Without it, the code my loop infinitely with a too small MaxWidth
+    GapSize = 15.4,        -- CSS Flex gapsize == 1em == 15.4px
+    LeftPadding = 3,       -- In CSS: The left property, not the padding-left property!
+    ExtraSpacePerText = 1, -- Idk, the space might be too short without it
+    DefaultCharWidth = 10, -- If a given char is not present in CharWidths
+    MinWidth = 20          -- Without it, the code my loop infinitely with a too small MaxWidth
 };
 
 
@@ -465,22 +465,19 @@ function AddStringToUI(UIGroup, Text, MaxWidth, ExpectedDepth)
         local hlg = UI.CreateHorizontalLayoutGroup(UIGroup);
 
         for _, textpiece in ipairs(line.Elements) do
-            if textpiece.Text == "" then
-                goto continue;
-            end
+            if textpiece.Text ~= "" then
+                ---@type Label
+                local label = UI.CreateLabel(hlg);
 
-            ---@type Label
-            local label = UI.CreateLabel(hlg);
+                if string.sub(textpiece.Color, 1, 1) ~= "#" then
+                    textpiece.Color = Colors[textpiece.Color]
+                end
 
-            if string.sub(textpiece.Color, 1, 1) ~= "#" then
-                textpiece.Color = Colors[textpiece.Color]
+                if textpiece.Color ~= nil and not (textpiece.Color == "") then
+                    label.SetColor(textpiece.Color);
+                end
+                label.SetText(textpiece.Text);
             end
-
-            if textpiece.Color ~= nil and not (textpiece.Color == "") then
-                label.SetColor(textpiece.Color);
-            end
-            label.SetText(textpiece.Text);
-            ::continue::
         end
     end
 end
