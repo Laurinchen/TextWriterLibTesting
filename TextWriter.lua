@@ -435,9 +435,9 @@ KaninchenLibTextWriter = {
 function AddStringToUI(UIGroup, Text, MaxWidth, ExpectedDepth)
 
     ExpectedDepth = ExpectedDepth or 2;
-    if math.type(ExpectedDepth) == "float" then
-        ExpectedDepth = math.ceil(ExpectedDepth);
-    end
+    -- if math.type(ExpectedDepth) == "float" then
+    --     ExpectedDepth = math.ceil(ExpectedDepth);
+    -- end
 
     if MaxWidth == nil then
         if UIGroup.GetPreferredWidth ~= nil then
