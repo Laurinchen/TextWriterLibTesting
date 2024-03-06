@@ -233,7 +233,7 @@ local function AddNewlines(TextPiece, CharIndex)
 
     CharIndex = CharIndex - 1;
 
-
+    
     ---@type integer
     local from = TextPiece.PositionInOriginal.From;
     ---@type integer
@@ -254,7 +254,7 @@ local function AddNewlines(TextPiece, CharIndex)
         return {
             CreateTextPiece(before, CreatePosition(from, from + CharIndex - 1), TextPiece.Color),
             CreateNewline(CreatePosition(from + CharIndex, from + CharIndex)),
-            CreateTextPiece(after, CreatePosition(from + CharIndex + 1, to), TextPiece.Color)
+            CreateTextPiece(after, CreatePosition(from + CharIndex + 1, math.max(from + CharIndex + 1, to)), TextPiece.Color)
         };
     end
     for ci = CharIndex, 1, -1 do
@@ -370,7 +370,7 @@ local function ParseElements(Elements, MaxWidth, ExpectedDepth)
                     else
                         ---@type Element[]
                         local result = AddNewlines(element, ci);
-
+                        
                         ---@type Element
                         local before = result[1];
                         ---@cast before TextPiece
@@ -467,8 +467,6 @@ function AddStringToUI(UIGroup, Text, MaxWidth, ExpectedDepth)
                 textpiece.Color = Colors[textpiece.Color]
             end
 
-            -- label.SetPreferredWidth(math.ceil(GetTextWidth(textpiece.Text)) + Constants.ExtraSpacePerText);
-            -- label.SetFlexibleWidth(0);
             if textpiece.Color ~= nil and not (textpiece.Color == "") then
                 label.SetColor(textpiece.Color);
             end
@@ -476,3 +474,7 @@ function AddStringToUI(UIGroup, Text, MaxWidth, ExpectedDepth)
         end
     end
 end
+
+ParseElements(GetElements([[Lorem </>ipsum dolor sit <#ffff00>amet, consetetur sadipscing </>elitr, sed diam nonumy eirmod tempor invidunt<wbr>ut labore et dolore magna <blue>aliquyam erat, sed<wbr>diam <#ffff00>voluptua. At vero eos et accusam et justo duo dolores <#ffff00>et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum <green>dolor sit amet. <blue>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed <blue>diam nonumy eirmod tempor </>invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et <yellow>justo duo dolores et ea <yellow>rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor </>sit amet. Lorem ipsum dolor sit amet, consetetur <#ffff00>sadipscing </>elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos <#ffff00>et accusam<wbr>et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea </>takimata sanctus est Lorem ipsum <#ffff00>dolor sit amet.<wbr>  
+
+Duis autem vel<wbr>eum iriure dolor in hendrerit <#ffff00>in <#ffff00>vulputate velit <green>esse molestie consequat, vel illum dolore <blue>eu feugiat </>nulla facilisis at vero eros]]), 100, 2)
