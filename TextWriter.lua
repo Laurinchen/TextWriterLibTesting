@@ -450,12 +450,9 @@ KaninchenLibTextWriter = {
 ---@param UIGroup HorizontalLayoutGroup | VerticalLayoutGroup | EmptyUIObject
 ---@param Text string
 ---@param MaxWidth? number
----@param ExpectedDepth? integer
-function AddStringToUI(UIGroup, Text, MaxWidth, ExpectedDepth)
-    ExpectedDepth = ExpectedDepth or 2;
-    -- if math.type(ExpectedDepth) == "float" then
-    --     ExpectedDepth = math.ceil(ExpectedDepth);
-    -- end
+---@param AncestorCountWithoutRoot? integer 
+function AddStringToUI(UIGroup, Text, MaxWidth, AncestorCountWithoutRoot)
+    AncestorCountWithoutRoot = AncestorCountWithoutRoot or 0;
 
     if MaxWidth == nil then
         if UIGroup.GetPreferredWidth ~= nil then
@@ -467,7 +464,7 @@ function AddStringToUI(UIGroup, Text, MaxWidth, ExpectedDepth)
 
     MaxWidth = math.max(Constants.MinWidth, MaxWidth);
 
-    for _, line in ipairs(ParseElements(GetElements(Text), MaxWidth, ExpectedDepth)) do
+    for _, line in ipairs(ParseElements(GetElements(Text), MaxWidth, AncestorCountWithoutRoot+2)) do
         ---@type HorizontalLayoutGroup
         local hlg = UI.CreateHorizontalLayoutGroup(UIGroup);
 
