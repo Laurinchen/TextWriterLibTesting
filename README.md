@@ -21,8 +21,8 @@ It has following signature:
 void AddStringToUI(
     HorizontalLayoutGroup | VerticalLayoutGroup | EmptyUIObject UIGroup,
     string Text,
-    number MaxWidth = 20,
-    integer ExpectedDepth = 2
+    number MaxWidth = 30,
+    integer AncestorCountWithoutRoot = 2
 );
 ```
 #### UIGroup
