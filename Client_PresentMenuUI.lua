@@ -15,8 +15,10 @@ function Client_PresentMenuUI(rootParent, setMaxSize, setScrollable, game, close
     ---@type VerticalLayoutGroup
     local UIInput = UI.CreateVerticalLayoutGroup(rootParent);
 
-    ---@type VerticalLayoutGroup
-    local UIResult = UI.CreateVerticalLayoutGroup(rootParent);
+    -- ---@type VerticalLayoutGroup
+    -- local UIResult = UI.CreateVerticalLayoutGroup(rootParent);
+    ---@type CreatedUIElements[]
+    local elements;
 
     ---@type NumberInputField
     local UIMaxWidth = UI.CreateNumberInputField(UIInput);
@@ -34,11 +36,12 @@ function Client_PresentMenuUI(rootParent, setMaxSize, setScrollable, game, close
     UIButton.SetText("Generate");
     UIButton.SetOnClick(
         function()
-            if not UI.IsDestroyed(UIResult) then
-                UI.Destroy(UIResult);
+            if elements ~= nil then
+                for _, element in ipairs(elements) do
+                    UI.Destroy(element.HorizontalLayoutGroup);
+                end
             end
-            UIResult = UI.CreateVerticalLayoutGroup(rootParent);
-            AddStringToUI(UIResult, UITextInput.GetText(), UIMaxWidth.GetValue());
+            elements = AddStringToUI(rootParent, UITextInput.GetText(), UIMaxWidth.GetValue());
         end
     );
 

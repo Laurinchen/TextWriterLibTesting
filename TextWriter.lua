@@ -2,6 +2,9 @@ require("Annotations");
 require("CharWidths");
 require("Colors");
 
+---@cast UI UI
+
+
 ---@type table<string, number>
 local Constants = {
     GapSize = 15.4,        -- CSS Flex gapsize == 1em == 15.4px
@@ -54,6 +57,11 @@ local ElementType = {
 ---@class Line
 ---@field Width number
 ---@field Elements TextPiece[]
+
+---@class CreatedUIElements
+---@field HorizontalLayoutGroup HorizontalLayoutGroup
+---@field Children Label[]
+
 
 ---Errors if Position field is not a number or negative, otherwise returns rounded field
 ---@param n integer
@@ -481,12 +489,13 @@ KaninchenLibTextWriter = {
     AddToElements = AddToElements
 };
 
----@param UIGroup HorizontalLayoutGroup | VerticalLayoutGroup | EmptyUIObject
+---@param UIGroup HorizontalLayoutGroup | VerticalLayoutGroup | EmptyUIObject | RootParent
 ---@param Text string
 ---@param MaxWidth? number
----@param AncestorCountWithoutRoot? integer
-function AddStringToUI(UIGroup, Text, MaxWidth, AncestorCountWithoutRoot)
-    AncestorCountWithoutRoot = AncestorCountWithoutRoot or 0;
+---@param AncestorCount? integer
+---@return CreatedUIElements[]
+function AddStringToUI(UIGroup, Text, MaxWidth, AncestorCount)
+    AncestorCount = AncestorCount or 1;
 
     if MaxWidth == nil then
         if UIGroup.GetPreferredWidth ~= nil then
@@ -498,32 +507,33 @@ function AddStringToUI(UIGroup, Text, MaxWidth, AncestorCountWithoutRoot)
 
     MaxWidth = math.max(Constants.MinWidth, MaxWidth);
 
-    for _, line in ipairs(ParseElements(GetElements(Text), MaxWidth, AncestorCountWithoutRoot + 2)) do
+    ---@type HorizontalLayoutGroup[]
+    local created_elements = {};
+
+    for _, line in ipairs(ParseElements(GetElements(Text), MaxWidth, AncestorCount)) do
         ---@type HorizontalLayoutGroup
         local hlg = UI.CreateHorizontalLayoutGroup(UIGroup);
-
+        
+        ---@type CreatedUIElements
+        local created_element = {Children = {}, HorizontalLayoutGroup=hlg};
+        
         for _, textpiece in ipairs(line.Elements) do
             if textpiece.Text ~= "" then
                 ---@type Label
                 local label = UI.CreateLabel(hlg);
-
+                table.insert(created_element.Children, label);
+                
                 if string.sub(textpiece.Color, 1, 1) ~= "#" then
                     textpiece.Color = Colors[textpiece.Color]
                 end
-
+                
                 if textpiece.Color ~= nil and not (textpiece.Color == "") then
                     label.SetColor(textpiece.Color);
                 end
                 label.SetText(textpiece.Text);
             end
         end
+        table.insert(created_elements, created_element);
     end
-end
-
-for _, value in pairs(ParseElements(GetElements("Hello<wbr>Guys,<wbr>The<wbr>Library<wbr>Is<wbr>Almost<wbr>Finished,<wbr>Also<wbr>Funny<wbr>Thing<wbr>I<wbr>Started<wbr>To<wbr>Talk<wbr>To<wbr>My<wbr>Alt<wbr>Account<wbr>Because<wbr>Noone<wbr>Wants<wbr>To<wbr>Hear<wbr>My<wbr>Shit<wbr>And<wbr>I<wbr>Think<wbr>I'm<wbr>Starting<wbr>To<wbr>Get<wbr>Crazy<wbr>This<wbr>Is<wbr>Not<wbr>A<wbr>Weird<wbr>Joke,<wbr>If<wbr>Someone<wbr>Talked<wbr>To<wbr>Me<wbr>It<wbr>Would<wbr>Immensly<wbr>Help"), 30, 2)) do
-    local toprint = ""
-    for _, v in pairs(value.Elements) do
-        toprint = toprint .. v.Text .. "; ";
-    end
-    print(value.Width, toprint);
+    return created_elements;
 end
