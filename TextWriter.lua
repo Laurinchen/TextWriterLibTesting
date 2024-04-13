@@ -11,7 +11,7 @@ local Constants = {
     LeftPadding = 3,       -- In CSS: The left property, not the padding-left property!
     ExtraSpacePerText = 1, -- Idk, the space might be too short without it
     DefaultCharWidth = 10, -- If a given char is not present in CharWidths
-    MinWidth = 30          -- Without it, the code might loop infinitely with a too small MaxWidth
+    MinWidth = 30,         -- Without it, the code might loop infinitely with a too small MaxWidth
 };
 
 
@@ -242,6 +242,13 @@ local function GetTextWidth(str)
     return width;
 end
 
+---@param str string
+---@return integer
+local function CalculateWidthToAdd(str)
+    return math.ceil(GetTextWidth(str) + Constants.GapSize + Constants.ExtraSpacePerText);
+end
+
+
 ---@param TextPiece TextPiece
 ---@param CharIndex integer
 ---@return Element[]
@@ -364,8 +371,7 @@ local function ParseElements(Elements, MaxWidth, ExpectedDepth)
             self.before.Elements[length] = CreateTextPiece(latest.Text .. toAdd.Text,
                 CreatePosition(latest.PositionInOriginal.From, toAdd.PositionInOriginal.To), latest.Color)
         else
-            self.after.Width = self.after.Width + math.ceil(GetTextWidth(toAdd.Text)) + Constants.ExtraSpacePerText +
-                Constants.GapSize + Constants.LeftPadding * ExpectedDepth;
+            self.after.Width = self.after.Width + CalculateWidthToAdd(toAdd.Text)
             table.insert(self.after.Elements, toAdd);
         end
     end
@@ -585,7 +591,7 @@ end
 
 ---Internal functions
 ---@type table<string, function | table<string, number>>
-KaninchenLibTextWriter = {
+KaninchenTextWriterLibInternals = {
     TestPositionField = TestPositionField,
     CreatePosition = CreatePosition,
     TestPosition = TestPosition,
@@ -601,7 +607,8 @@ KaninchenLibTextWriter = {
     Constants = Constants,
     ParsingMode = ParsingMode,
     ElementType = ElementType,
-    AddElementsToUI = AddElementsToUI
+    AddElementsToUI = AddElementsToUI,
+    CalculateWidthToAdd = CalculateWidthToAdd
 };
 
 
@@ -623,4 +630,13 @@ function AddStringToUI(UIGroup, Text, MaxWidth, AncestorCount)
 
     MaxWidth = math.max(Constants.MinWidth, MaxWidth);
     return AddElementsToUI(UIGroup, ParseElements(GetElements(Text), MaxWidth, AncestorCount))
+end
+
+local text = "Word Word1<wbr>Word2<wbr>Word3<wbr>";
+for _, value in ipairs(ParseElements(GetElements(text), 202, 2)) do
+    local x = ""
+    for _, value2 in ipairs(value.Elements) do
+        x = x .. value2.Text .. " "
+    end
+    print(x)
 end

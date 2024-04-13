@@ -2,7 +2,7 @@
 This is a library to easily add colorful Text to your UI of your Warzone Mod.
 
 ## Disclaimer
-This Library is in Alpha. It does most likely only display correctly on the [Website](https://www.warzone.com/), not on the Standalone Client or Mobile Client.<br>
+This Library is in Alpha. It does most likely only display correctly on the [Website](https://www.warzone.com/), not on the Standalone Client or Mobile Client (especially in portrait mode).<br>
 You can discuss the library on [The Warzone Modmaker Discord](https://discord.com/invite/hqGkVXagyt).<br>
 Feel free to make pull requests and open Issues
 
@@ -25,6 +25,7 @@ AddStringToUI(
     integer AncestorCount = 1
 ) -> table<HorizontalLayoutGroup: HorizontalLayoutGroup, Children: Label[]>;
 ```
+
 #### UIGroup
 <b>UIGroup</b>
 This is the UI container which the elements will be added to.<br>
@@ -37,7 +38,7 @@ For example `"Hello, <red>this Text will be displayed as red, <#0000ff>and this 
 A tag is denoted with a less than `<`, the tag content and a greater than `>`.<br>
 
 There are 4 kinds of tag contents
-- Literal color Names
+- Literal color names
 - Color Hexcode
 - Literal `/`
 - Literal `wbr`
@@ -63,7 +64,7 @@ Example: `"<red>This is red</>This is default"` Will make "This is red" be displ
 ##### Literal `wbr`
 This is per se not a color tag, but is instead used to indicate that a long word can be broken at this location (where `<wbr>` is).<br>
 Note that the library will prefer to insert newlines on spaces instead.<br>
-`wbr` means wordbreak. [More Information here](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/wbr?retiredLocale=de)<br>
+`wbr` means wordbreak. [More Information here](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/wbr)<br>
 Example: `"ThisIs<wbr>AVeryLongWord"`<br>
 If the given `MaxWidth` is too short to display the whole string, it may display<br>
 "ThisIs" on the first line and<br>
@@ -79,11 +80,11 @@ Example: `"<blue>This will be displayed on line 1 \nAnd this on line 2"`<br>
 The blue color from the first line will continue on the second line.
 
 #### MaxWidth
-(Default 20)<br>
+(Default 30)<br>
 MaxWidth denotes how many pixels a line can take up. This includes gap size (internal), padding (internal) etc.<br>
 If not set, it will default to the preferred width of the UIGroup. If this is -1 (fit content) or<br>
-MaxWidth is smaller than 20, it will default to 20.<br>
-The default is not enough to properly display Texts, but it is enough to display most characters.<br>
+MaxWidth is smaller than 30, it will default to 30.<br>
+The default is not enough to properly display Texts, but it is enough to display most characters so the Lib won't infinitly loop.<br>
 
 #### AncestorCount
 (Default 1)<br>
@@ -98,7 +99,7 @@ rootParent rootparent
 In this case, `UIGroup` has, not counting itself, 3 ancestors (`rootParent`, `a` and `b`).<br>
 Therefore, a 3 should be passed.<br>
 
-If you directly pass `rootParent` as `UIGroup` to `AddStringToUI`, then you should pass a 1.<br>
+If you directly pass `rootParent` as `UIGroup` to `AddStringToUI`, then you should pass a 1 (default).<br>
 If you first create a container class for the generated text, which inherits from rootParent, then you should pass a 2,<br>
 etc.<br>
 
@@ -111,15 +112,15 @@ The "table convention" is as follows:
 ---@field HorizontalLayoutGroup HorizontalLayoutGroup
 ---@field Children Label[]
 ```
-The arrays are ordered after creation.
+The array is ordered after creation.
 
 ### Available Colors
 Next to hexcodes you can use predefines colors, listed in `Colors.lua`<br>
 
 ### Internal functions.
-You can access internal functions and tables via KaninchenLibTextWriter["NAME"] where Name is replaced by the function/table/enum name.<br>
+You can access internal functions and tables via `KaninchenTextWriterLibInternals["NAME"]` where `NAME` is replaced by the function/table/enum name.<br>
 Refer to the documentation of the functions.<br>
-For Example `local width = KaninchenLibTextWriter["GetTextWidth"]("Hello World!");`<br>
+For Example `local width = KaninchenTextWriterLibInternals["GetTextWidth"]("Hello World!");`<br>
 This is to prevent namespace pollution<br>
 
 ## Copyright and Credit
