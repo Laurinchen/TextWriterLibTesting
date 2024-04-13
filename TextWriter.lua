@@ -631,12 +631,3 @@ function AddStringToUI(UIGroup, Text, MaxWidth, AncestorCount)
     MaxWidth = math.max(Constants.MinWidth, MaxWidth);
     return AddElementsToUI(UIGroup, ParseElements(GetElements(Text), MaxWidth, AncestorCount))
 end
-
-local text = "Word Word1<wbr>Word2<wbr>Word3<wbr>";
-for _, value in ipairs(ParseElements(GetElements(text), 202, 2)) do
-    local x = ""
-    for _, value2 in ipairs(value.Elements) do
-        x = x .. value2.Text .. " "
-    end
-    print(x)
-end
