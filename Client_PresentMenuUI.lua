@@ -15,20 +15,22 @@ function Client_PresentMenuUI(rootParent, setMaxSize, setScrollable, game, close
     ---@type VerticalLayoutGroup
     local UIInput = UI.CreateVerticalLayoutGroup(rootParent);
 
-    -- ---@type VerticalLayoutGroup
-    -- local UIResult = UI.CreateVerticalLayoutGroup(rootParent);
     ---@type CreatedUIElements[]
     local elements;
 
+    ---@type VerticalLayoutGroup
+    local UIResult = UI.CreateVerticalLayoutGroup(rootParent);
+
     ---@type NumberInputField
     local UIMaxWidth = UI.CreateNumberInputField(UIInput);
-    UIMaxWidth.SetSliderMinValue(50)
+    UIMaxWidth.SetSliderMinValue(150)
     UIMaxWidth.SetSliderMaxValue(1000);
 
     ---@type TextInputField
     local UITextInput = UI.CreateTextInputField(UIInput)
     UITextInput.SetPreferredHeight(200);
     UITextInput.SetFlexibleWidth(700);
+    UITextInput.SetText("Word Word1<wbr>Word2<wbr>Word3<wbr>");
 
 
     ---@type Button
@@ -41,7 +43,13 @@ function Client_PresentMenuUI(rootParent, setMaxSize, setScrollable, game, close
                     UI.Destroy(element.HorizontalLayoutGroup);
                 end
             end
-            elements = AddStringToUI(rootParent, UITextInput.GetText(), UIMaxWidth.GetValue());
+            elements = AddStringToUI(UIResult, UITextInput.GetText(), UIMaxWidth.GetValue());
+            for _, line in ipairs(elements) do
+                print(line.HorizontalLayoutGroup);
+                for _, value in ipairs(line.Children) do
+                    print("XXX", value.GetText());
+                end
+            end
         end
     );
 
