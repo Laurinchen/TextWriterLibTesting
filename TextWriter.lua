@@ -1,4 +1,3 @@
-pcall(require, "debuglib")
 require("Annotations");
 require("CharWidths");
 require("Colors");
