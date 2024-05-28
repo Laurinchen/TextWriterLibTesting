@@ -1,7 +1,7 @@
 require("Annotations");
 require("TextWriter");
 
-
+---@cast UI UI
 
 
 ---Client_PresentMenuUI hook
@@ -12,6 +12,7 @@ require("TextWriter");
 ---@param close fun() # Zero parameter function that closes the dialog
 function Client_PresentMenuUI(rootParent, setMaxSize, setScrollable, game, close)
     setMaxSize(1000, 500);
+
     ---@type VerticalLayoutGroup
     local UIInput = UI.CreateVerticalLayoutGroup(rootParent);
 
@@ -30,8 +31,23 @@ function Client_PresentMenuUI(rootParent, setMaxSize, setScrollable, game, close
     local UITextInput = UI.CreateTextInputField(UIInput)
     UITextInput.SetPreferredHeight(200);
     UITextInput.SetFlexibleWidth(700);
-    UITextInput.SetText("Word Word1<wbr>Word2<wbr>Word3<wbr>");
+    UITextInput.SetText("Normal\n🕑\n<>\n<lol>\n<abcdef>\n<#oh no>\n<yay");
 
+    ---@type NumberInputField
+    local UIButtonWidthInput = UI.CreateNumberInputField(rootParent);
+    UIButtonWidthInput.SetWholeNumbers(true);
+
+    ---@type Button
+    local UIWidthButton = UI.CreateButton(rootParent);
+
+    ---@type Button
+    local setButton = UI.CreateButton(rootParent);
+    setButton.SetText("Let's goooo");
+    setButton.SetOnClick(
+        function()
+            UIWidthButton.SetPreferredWidth(UIButtonWidthInput.GetValue());
+        end
+    )
 
     ---@type Button
     local UIButton = UI.CreateButton(UIInput);
@@ -40,17 +56,10 @@ function Client_PresentMenuUI(rootParent, setMaxSize, setScrollable, game, close
         function()
             if elements ~= nil then
                 for _, element in ipairs(elements) do
-                    UI.Destroy(element.HorizontalLayoutGroup);
+                    UI.Destroy(element.LayoutGroup);
                 end
             end
-            elements = AddStringToUI(UIResult, UITextInput.GetText(), UIMaxWidth.GetValue());
-            for _, line in ipairs(elements) do
-                print(line.HorizontalLayoutGroup);
-                for _, value in ipairs(line.Children) do
-                    print("XXX", value.GetText());
-                end
-            end
+            elements = AddStringToUI(rootParent, UITextInput.GetText(), {MaxWidth=1000, ErrorHandler=ProblemHandlerFactory(true, true, true), WarningHandler=ProblemHandlerFactory(false, true)}).List;
         end
     );
-
 end

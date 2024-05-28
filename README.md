@@ -19,10 +19,9 @@ The main functions you will be using is `AddStringToUI`.<br>
 It has following signature:
 ```cpp
 AddStringToUI(
-    HorizontalLayoutGroup | VerticalLayoutGroup | EmptyUIObject | RootParent UIGroup,
+    UIObject UIGroup,
     string Text,
-    number MaxWidth = 30,
-    integer AncestorCount = 1
+    
 ) -> table<HorizontalLayoutGroup: HorizontalLayoutGroup, Children: Label[]>;
 ```
 
